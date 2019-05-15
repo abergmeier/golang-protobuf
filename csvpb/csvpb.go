@@ -365,41 +365,26 @@ func (u *Unmarshaler) unmarshalValue(target reflect.Value, inputValue string, pr
 			return nil
 		case "Value":
 			ivStr := string(inputValue)
-			if typeHint == DOUBLE || typeHint == FLOAT {
-				if ivStr == "" {
-					target.Field(0).Set(reflect.ValueOf(&stpb.Value_NullValue{}))
-					return nil
-				}
-				var err error
-				var v float64
-				if v, err = strconv.ParseFloat(ivStr, 0); err != nil {
-					return err
-				}
-				target.Field(0).Set(reflect.ValueOf(&stpb.Value_NumberValue{v}))
+			if ivStr == "" {
+				target.Field(0).Set(reflect.ValueOf(&stpb.Value_NullValue{}))
 				return nil
-			} else if typeHint == STRING {
-				if ivStr == "" {
-					target.Field(0).Set(reflect.ValueOf(&stpb.Value_NullValue{}))
+			}
+
+			if strings.Contains(ivStr, ".") {
+				if v, err := strconv.ParseFloat(ivStr, 0); err == nil {
+					target.Field(0).Set(reflect.ValueOf(&stpb.Value_NumberValue{v}))
 					return nil
 				}
-				
-				target.Field(0).Set(reflect.ValueOf(&stpb.Value_StringValue{ivStr}))
-				return nil
-			} else if typeHint == BOOL {
-				if ivStr == "" {
-					target.Field(0).Set(reflect.ValueOf(&stpb.Value_BoolValue{false}))
-					return nil
-				}
-				var err error
-				var v bool
-				if v, err = strconv.ParseBool(ivStr); err != nil {
-					return err
-				}
+			}
+
+			if v, err := strconv.ParseBool(ivStr); err == nil {
 				target.Field(0).Set(reflect.ValueOf(&stpb.Value_BoolValue{v}))
 				return nil
-			} else {
-				return fmt.Errorf("unrecognized type for Value %q", ivStr)
 			}
+			
+			// There is no good way to detect signedness so default to plain
+			// string for anything else
+			target.Field(0).Set(reflect.ValueOf(&stpb.Value_StringValue{ivStr}))
 			return nil
 		}
 	}

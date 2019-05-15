@@ -40,6 +40,7 @@ import (
 	"github.com/golang/protobuf/proto"
 
 	pb "github.com/abergmeier/protobuf/csvpb/csvpb_test_proto"
+	stpb "github.com/golang/protobuf/ptypes/struct"
 	wpb "github.com/golang/protobuf/ptypes/wrappers"
 )
 
@@ -165,6 +166,11 @@ var unmarshalingTests = []struct {
 	{"enum-string object", Unmarshaler{}, "color\nBLUE", &pb.Widget{Color: pb.Widget_BLUE.Enum()}},
 	{"enum-value object", Unmarshaler{}, "color\n 2", &pb.Widget{Color: pb.Widget_BLUE.Enum()}},
 	{"unknown field with allowed option", Unmarshaler{AllowUnknownFields: true}, "unknown\nfoo", new(pb.Simple)},
+
+	{"null Value", Unmarshaler{}, "val\n\"\"", &pb.KnownTypes{Val: &stpb.Value{Kind: &stpb.Value_NullValue{stpb.NullValue_NULL_VALUE}}}},
+	{"bool Value", Unmarshaler{}, "val\ntrue", &pb.KnownTypes{Val: &stpb.Value{Kind: &stpb.Value_BoolValue{true}}}},
+	{"string Value", Unmarshaler{}, "val\nx", &pb.KnownTypes{Val: &stpb.Value{Kind: &stpb.Value_StringValue{"x"}}}},
+	{"string number value", Unmarshaler{}, "val\n\"9223372036854775807\"", &pb.KnownTypes{Val: &stpb.Value{Kind: &stpb.Value_StringValue{"9223372036854775807"}}}},
 
 	{"DoubleValue", Unmarshaler{}, "dbl\n1.2", &pb.KnownTypes{Dbl: &wpb.DoubleValue{Value: 1.2}}},
 	{"FloatValue", Unmarshaler{}, "flt\n1.2", &pb.KnownTypes{Flt: &wpb.FloatValue{Value: 1.2}}},
