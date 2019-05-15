@@ -87,7 +87,7 @@ message Repeats {
   repeated bytes r_bytes = 11;
 }
 
-// Test message for holding enums and nested messages.
+// Test message for holding enums.
 message Widget {
   enum Color {
     RED = 0;
@@ -96,12 +96,6 @@ message Widget {
   };
   optional Color color = 1;
   repeated Color r_color = 2;
-
-  optional Simple simple = 10;
-  repeated Simple r_simple = 11;
-
-  optional Repeats repeats = 20;
-  repeated Repeats r_repeats = 21;
 }
 
 message Maps {

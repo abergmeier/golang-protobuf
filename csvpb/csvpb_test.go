@@ -114,6 +114,16 @@ var (
 		`"2.99792458e+28,6.62606957e-34",` +
 		`"happy,days",` +
 		`"c2tpdHRsZXM=,bSZtJ3M="`
+
+	enumObject = &pb.Widget{
+		Color:    pb.Widget_GREEN.Enum(),
+		RColor:   []pb.Widget_Color{pb.Widget_RED, pb.Widget_GREEN, pb.Widget_BLUE},
+	}
+
+	enumObjectCSV = `color,rColor
+` +
+		`GREEN,` +
+		`"RED,GREEN,BLUE"`
 )
 
 var unmarshalingTests = []struct {
@@ -124,6 +134,7 @@ var unmarshalingTests = []struct {
 }{
 	{"simple flat object", Unmarshaler{}, simpleInputCSV, simpleObject},
 	{"repeated fields flat object", Unmarshaler{}, repeatsObjectCSV, repeatsObject},
+	{"nested enum flat object", Unmarshaler{}, enumObjectCSV, enumObject},
 }
 
 func TestUnmarshaling(t *testing.T) {

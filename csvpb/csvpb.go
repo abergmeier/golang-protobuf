@@ -404,30 +404,6 @@ func (u *Unmarshaler) unmarshalValue(target reflect.Value, inputValue string, pr
 		}
 	}
 
-	// Handle enums, which have an underlying type of int32,
-	// and may appear as strings.
-	// The case of an enum appearing as a number is handled
-	// at the bottom of this function.
-	if inputValue[0] == '"' && prop != nil && prop.Enum != "" {
-		vmap := proto.EnumValueMap(prop.Enum)
-		// Don't need to do unquoting; valid enum names
-		// are from a limited character set.
-		s := inputValue[1 : len(inputValue)-1]
-		n, ok := vmap[string(s)]
-		if !ok {
-			return fmt.Errorf("unknown value %q for enum %s", s, prop.Enum)
-		}
-		if target.Kind() == reflect.Ptr { // proto2
-			target.Set(reflect.New(targetType.Elem()))
-			target = target.Elem()
-		}
-		if targetType.Kind() != reflect.Int32 {
-			return fmt.Errorf("invalid target %q for enum %s", targetType.Kind(), prop.Enum)
-		}
-		target.SetInt(int64(n))
-		return nil
-	}
-
 	// Handle nested messages.
 	if targetType.Kind() == reflect.Struct {
 		return errors.New("Nested messages not supported yet")
@@ -503,6 +479,24 @@ func (u *Unmarshaler) unmarshalValue(target reflect.Value, inputValue string, pr
 		return nil
 	}
 	*/
+
+	// Handle enums, which have an underlying type of int32,
+	// and may appear as strings.
+	// The case of an enum appearing as a number is handled
+	// at the bottom of this function.
+	if prop != nil && prop.Enum != "" {
+		vmap := proto.EnumValueMap(prop.Enum)
+		s := inputValue
+		n, ok := vmap[s]
+		if !ok {
+			return fmt.Errorf("unknown value %q for enum %s", s, prop.Enum)
+		}
+		if targetType.Kind() != reflect.Int32 {
+			return fmt.Errorf("invalid target %q for enum %s", targetType.Kind(), prop.Enum)
+		}
+		target.SetInt(int64(n))
+		return nil
+	}
 
 	isBool := targetType.Kind() == reflect.Bool
 	if isBool {
