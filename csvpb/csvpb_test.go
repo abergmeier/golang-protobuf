@@ -40,6 +40,7 @@ import (
 	"github.com/golang/protobuf/proto"
 
 	pb "github.com/abergmeier/protobuf/csvpb/csvpb_test_proto"
+	wpb "github.com/golang/protobuf/ptypes/wrappers"
 )
 
 var (
@@ -163,6 +164,33 @@ var unmarshalingTests = []struct {
 	{"nested enum flat object", Unmarshaler{}, enumObjectCSV, enumObject},
 	{"enum-string object", Unmarshaler{}, "color\nBLUE", &pb.Widget{Color: pb.Widget_BLUE.Enum()}},
 	{"enum-value object", Unmarshaler{}, "color\n 2", &pb.Widget{Color: pb.Widget_BLUE.Enum()}},
+	{"unknown field with allowed option", Unmarshaler{AllowUnknownFields: true}, "unknown\nfoo", new(pb.Simple)},
+
+	{"DoubleValue", Unmarshaler{}, "dbl\n1.2", &pb.KnownTypes{Dbl: &wpb.DoubleValue{Value: 1.2}}},
+	{"FloatValue", Unmarshaler{}, "flt\n1.2", &pb.KnownTypes{Flt: &wpb.FloatValue{Value: 1.2}}},
+	{"Int64Value", Unmarshaler{}, "i64\n-3", &pb.KnownTypes{I64: &wpb.Int64Value{Value: -3}}},
+	{"UInt64Value", Unmarshaler{}, "u64\n3", &pb.KnownTypes{U64: &wpb.UInt64Value{Value: 3}}},
+	{"Int32Value", Unmarshaler{}, "i32\n-4", &pb.KnownTypes{I32: &wpb.Int32Value{Value: -4}}},
+	{"UInt32Value", Unmarshaler{}, "u32\n4", &pb.KnownTypes{U32: &wpb.UInt32Value{Value: 4}}},
+	{"BoolValue", Unmarshaler{}, "bool\ntrue", &pb.KnownTypes{Bool: &wpb.BoolValue{Value: true}}},
+	{"StringValue", Unmarshaler{}, "str\nplush", &pb.KnownTypes{Str: &wpb.StringValue{Value: "plush"}}},
+	{"StringValue containing escaped character", Unmarshaler{}, "str\na/b", &pb.KnownTypes{Str: &wpb.StringValue{Value: "a/b"}}},
+	{"BytesValue", Unmarshaler{}, "bytes\nd293", &pb.KnownTypes{Bytes: &wpb.BytesValue{Value: []byte("wow")}}},
+
+
+	// Ensure that `null` as a value ends up with a nil pointer instead of a [type]Value struct.
+	{"null DoubleValue", Unmarshaler{}, "dbl\nnull", &pb.KnownTypes{Dbl: nil}},
+	{"null FloatValue", Unmarshaler{}, "flt\nnull", &pb.KnownTypes{Flt: nil}},
+	{"null Int64Value", Unmarshaler{}, "i64\nnull", &pb.KnownTypes{I64: nil}},
+	{"null UInt64Value", Unmarshaler{}, "u64\nnull", &pb.KnownTypes{U64: nil}},
+	{"null Int32Value", Unmarshaler{}, "i32\nnull", &pb.KnownTypes{I32: nil}},
+	{"null UInt32Value", Unmarshaler{}, "u32\nnull", &pb.KnownTypes{U32: nil}},
+	{"null BoolValue", Unmarshaler{}, "bool\nnull", &pb.KnownTypes{Bool: nil}},
+	{"null StringValue", Unmarshaler{}, "str\nnull", &pb.KnownTypes{Str: nil}},
+	{"null BytesValue", Unmarshaler{}, "bytes\nnull", &pb.KnownTypes{Bytes: nil}},
+
+	{"required", Unmarshaler{}, "str\nhello", &pb.MsgWithRequired{Str: proto.String("hello")}},
+	{"required bytes", Unmarshaler{}, "byts\n\"\"", &pb.MsgWithRequiredBytes{Byts: []byte{}}},
 }
 
 func TestUnmarshaling(t *testing.T) {
