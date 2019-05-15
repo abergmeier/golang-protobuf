@@ -32,6 +32,7 @@
 package csvpb
 
 import (
+	"math"
 	"reflect"
 	"strings"
 	"testing"
@@ -115,6 +116,10 @@ var (
 		`"happy,days",` +
 		`"c2tpdHRsZXM=,bSZtJ3M="`
 
+	innerSimple   = &pb.Simple{OInt32: proto.Int32(-32)}
+	innerSimple2  = &pb.Simple{OInt64: proto.Int64(25)}
+	innerRepeats  = &pb.Repeats{RString: []string{"roses", "red"}}
+	innerRepeats2 = &pb.Repeats{RString: []string{"violets", "blue"}}
 	enumObject = &pb.Widget{
 		Color:    pb.Widget_GREEN.Enum(),
 		RColor:   []pb.Widget_Color{pb.Widget_RED, pb.Widget_GREEN, pb.Widget_BLUE},
@@ -124,6 +129,27 @@ var (
 ` +
 		`GREEN,` +
 		`"RED,GREEN,BLUE"`
+
+	realNumber     = &pb.Real{Value: proto.Float64(3.14159265359)}
+	realNumberName = "Pi"
+	complexNumber  = &pb.Complex{Imaginary: proto.Float64(0.5772156649)}
+
+	nonFinites = &pb.NonFinites{
+		FNan:  proto.Float32(float32(math.NaN())),
+		FPinf: proto.Float32(float32(math.Inf(1))),
+		FNinf: proto.Float32(float32(math.Inf(-1))),
+		DNan:  proto.Float64(float64(math.NaN())),
+		DPinf: proto.Float64(float64(math.Inf(1))),
+		DNinf: proto.Float64(float64(math.Inf(-1))),
+	}
+	nonFinitesCSV = `fNan,fPinf,fNinf,dNan,dPinf,dNinf
+` +
+		`NaN,` +
+		`Infinity,` +
+		`-Infinity,` +
+		`NaN,` +
+		`Infinity` +
+		`-Infinity`
 )
 
 var unmarshalingTests = []struct {
@@ -135,6 +161,8 @@ var unmarshalingTests = []struct {
 	{"simple flat object", Unmarshaler{}, simpleInputCSV, simpleObject},
 	{"repeated fields flat object", Unmarshaler{}, repeatsObjectCSV, repeatsObject},
 	{"nested enum flat object", Unmarshaler{}, enumObjectCSV, enumObject},
+	{"enum-string object", Unmarshaler{}, "color\nBLUE", &pb.Widget{Color: pb.Widget_BLUE.Enum()}},
+	{"enum-value object", Unmarshaler{}, "color\n 2", &pb.Widget{Color: pb.Widget_BLUE.Enum()}},
 }
 
 func TestUnmarshaling(t *testing.T) {

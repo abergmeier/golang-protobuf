@@ -486,16 +486,24 @@ func (u *Unmarshaler) unmarshalValue(target reflect.Value, inputValue string, pr
 	// at the bottom of this function.
 	if prop != nil && prop.Enum != "" {
 		vmap := proto.EnumValueMap(prop.Enum)
+		inputValue = strings.TrimSpace(inputValue)
 		s := inputValue
 		n, ok := vmap[s]
 		if !ok {
-			return fmt.Errorf("unknown value %q for enum %s", s, prop.Enum)
+			// Check whether input is a number and thus we handle it later
+			_, err := strconv.ParseUint(s, 10, 32)
+			if err != nil {
+				return fmt.Errorf("unknown value %q for enum %s", s, prop.Enum)
+			}
+			ok = false
 		}
-		if targetType.Kind() != reflect.Int32 {
-			return fmt.Errorf("invalid target %q for enum %s", targetType.Kind(), prop.Enum)
+		if ok { // Only process string
+			if targetType.Kind() != reflect.Int32 {
+				return fmt.Errorf("invalid target %q for enum %s", targetType.Kind(), prop.Enum)
+			}
+			target.SetInt(int64(n))
+			return nil
 		}
-		target.SetInt(int64(n))
-		return nil
 	}
 
 	isBool := targetType.Kind() == reflect.Bool
