@@ -381,9 +381,11 @@ func (u *Unmarshaler) unmarshalValue(target reflect.Value, inputValue string, pr
 				}
 			}
 
-			if v, err := strconv.ParseBool(ivStr); err == nil {
-				target.Field(0).Set(reflect.ValueOf(&stpb.Value_BoolValue{v}))
-				return nil
+			if ivStr != "1" && ivStr != "t" && ivStr != "T" && ivStr != "0" && ivStr != "f" && ivStr != "F" {
+				if v, err := strconv.ParseBool(ivStr); err == nil {
+					target.Field(0).Set(reflect.ValueOf(&stpb.Value_BoolValue{v}))
+					return nil
+				}
 			}
 
 			if v, err := strconv.ParseFloat(ivStr, 0); err == nil {

@@ -228,6 +228,12 @@ var unmarshalingTests = []struct {
 		{Kind: &stpb.Value_NumberValue{3}},
 		{Kind: &stpb.Value_BoolValue{true}},
 	}}}},
+	{"number Value", Unmarshaler{}, "val\n1", &pb.KnownTypes{Val: &stpb.Value{Kind: &stpb.Value_NumberValue{1}}}},
+	{"null Value", Unmarshaler{}, "val\nnull", &pb.KnownTypes{Val: &stpb.Value{Kind: &stpb.Value_StringValue{"null"}}}},
+	{"bool Value", Unmarshaler{}, "val\ntrue", &pb.KnownTypes{Val: &stpb.Value{Kind: &stpb.Value_BoolValue{true}}}},
+	{"string Value", Unmarshaler{}, "val\nx", &pb.KnownTypes{Val: &stpb.Value{Kind: &stpb.Value_StringValue{"x"}}}},
+	{"string number value", Unmarshaler{}, "val\n9223372036854775807", &pb.KnownTypes{Val: &stpb.Value{Kind: &stpb.Value_NumberValue{9223372036854775807}}}},
+
 	{"DoubleValue", Unmarshaler{}, "dbl\n1.2", &pb.KnownTypes{Dbl: &wpb.DoubleValue{Value: 1.2}}},
 	{"FloatValue", Unmarshaler{}, "flt\n1.2", &pb.KnownTypes{Flt: &wpb.FloatValue{Value: 1.2}}},
 	{"Int64Value", Unmarshaler{}, "i64\n-3", &pb.KnownTypes{I64: &wpb.Int64Value{Value: -3}}},
