@@ -39,8 +39,11 @@ import (
 
 	"github.com/golang/protobuf/proto"
 
+	durpb "github.com/golang/protobuf/ptypes/duration"
 	pb "github.com/abergmeier/protobuf/csvpb/csvpb_test_proto"
+	proto3pb "github.com/golang/protobuf/proto/proto3_proto"
 	stpb "github.com/golang/protobuf/ptypes/struct"
+	tspb "github.com/golang/protobuf/ptypes/timestamp"
 	wpb "github.com/golang/protobuf/ptypes/wrappers"
 )
 
@@ -166,12 +169,65 @@ var unmarshalingTests = []struct {
 	{"enum-string object", Unmarshaler{}, "color\nBLUE", &pb.Widget{Color: pb.Widget_BLUE.Enum()}},
 	{"enum-value object", Unmarshaler{}, "color\n 2", &pb.Widget{Color: pb.Widget_BLUE.Enum()}},
 	{"unknown field with allowed option", Unmarshaler{AllowUnknownFields: true}, "unknown\nfoo", new(pb.Simple)},
-
+	{"proto3 enum string", Unmarshaler{}, "hilarity\nPUNS", &proto3pb.Message{Hilarity: proto3pb.Message_PUNS}},
+	{"proto3 enum value", Unmarshaler{}, "hilarity\n1", &proto3pb.Message{Hilarity: proto3pb.Message_PUNS}},
+	{"unknown enum value object",
+		Unmarshaler{},
+		"color,r_color\n1000,RED",
+		&pb.Widget{Color: pb.Widget_Color(1000).Enum(), RColor: []pb.Widget_Color{pb.Widget_RED}}},
+	{"repeated proto3 enum", Unmarshaler{}, "rFunny\n\"PUNS,SLAPSTICK\"",
+		&proto3pb.Message{RFunny: []proto3pb.Message_Humour{
+			proto3pb.Message_PUNS,
+			proto3pb.Message_SLAPSTICK,
+		}}},
+	{"repeated proto3 enum as int", Unmarshaler{}, "rFunny\n\"1,2\"",
+		&proto3pb.Message{RFunny: []proto3pb.Message_Humour{
+			proto3pb.Message_PUNS,
+			proto3pb.Message_SLAPSTICK,
+		}}},
+	{"repeated proto3 enum as mix of strings and ints", Unmarshaler{}, "rFunny\n\"PUNS,2\"",
+		&proto3pb.Message{RFunny: []proto3pb.Message_Humour{
+			proto3pb.Message_PUNS,
+			proto3pb.Message_SLAPSTICK,
+		}}},
+	{"unquoted int64 object", Unmarshaler{}, "oInt64\n-314", &pb.Simple{OInt64: proto.Int64(-314)}},
+	{"unquoted uint64 object", Unmarshaler{}, "oUint64\n123", &pb.Simple{OUint64: proto.Uint64(123)}},
+	{"NaN", Unmarshaler{}, "oDouble\nNaN", &pb.Simple{ODouble: proto.Float64(math.NaN())}},
+	{"Inf", Unmarshaler{}, "oFloat\nInfinity", &pb.Simple{OFloat: proto.Float32(float32(math.Inf(1)))}},
+	{"-Inf", Unmarshaler{}, "oDouble\n-Infinity", &pb.Simple{ODouble: proto.Float64(math.Inf(-1))}},
 	{"null Value", Unmarshaler{}, "val\n\"\"", &pb.KnownTypes{Val: &stpb.Value{Kind: &stpb.Value_NullValue{stpb.NullValue_NULL_VALUE}}}},
 	{"bool Value", Unmarshaler{}, "val\ntrue", &pb.KnownTypes{Val: &stpb.Value{Kind: &stpb.Value_BoolValue{true}}}},
 	{"string Value", Unmarshaler{}, "val\nx", &pb.KnownTypes{Val: &stpb.Value{Kind: &stpb.Value_StringValue{"x"}}}},
 	{"string number value", Unmarshaler{}, "val\n\"9223372036854775807\"", &pb.KnownTypes{Val: &stpb.Value{Kind: &stpb.Value_StringValue{"9223372036854775807"}}}},
 
+	{"oneof", Unmarshaler{}, "salary\n31000", &pb.MsgWithOneof{Union: &pb.MsgWithOneof_Salary{31000}}},
+	{"oneof spec name", Unmarshaler{}, "Country\nAustralia", &pb.MsgWithOneof{Union: &pb.MsgWithOneof_Country{"Australia"}}},
+	{"oneof orig_name", Unmarshaler{}, "Country\nAustralia", &pb.MsgWithOneof{Union: &pb.MsgWithOneof_Country{"Australia"}}},
+	{"oneof spec name2", Unmarshaler{}, "homeAddress\nAustralia", &pb.MsgWithOneof{Union: &pb.MsgWithOneof_HomeAddress{"Australia"}}},
+	{"oneof orig_name2", Unmarshaler{}, "home_address\nAustralia", &pb.MsgWithOneof{Union: &pb.MsgWithOneof_HomeAddress{"Australia"}}},
+	{"orig_name input", Unmarshaler{}, "o_bool\ntrue", &pb.Simple{OBool: proto.Bool(true)}},
+	{"camelName input", Unmarshaler{}, "oBool\ntrue", &pb.Simple{OBool: proto.Bool(true)}},
+
+	{"Duration", Unmarshaler{}, "dur\n3.000s", &pb.KnownTypes{Dur: &durpb.Duration{Seconds: 3}}},
+	{"Duration", Unmarshaler{}, "dur\n4s", &pb.KnownTypes{Dur: &durpb.Duration{Seconds: 4}}},
+	{"Duration with unicode", Unmarshaler{}, "dur\n3\u0073", &pb.KnownTypes{Dur: &durpb.Duration{Seconds: 3}}},
+	{"null Duration", Unmarshaler{}, "dur\nnull", &pb.KnownTypes{Dur: nil}},
+	{"Timestamp", Unmarshaler{}, "ts\n2014-05-13T16:53:20.021Z", &pb.KnownTypes{Ts: &tspb.Timestamp{Seconds: 14e8, Nanos: 21e6}}},
+	{"Timestamp", Unmarshaler{}, "ts\n2014-05-13T16:53:20Z", &pb.KnownTypes{Ts: &tspb.Timestamp{Seconds: 14e8, Nanos: 0}}},
+	{"Timestamp with unicode", Unmarshaler{}, "ts\n2014-05-13T16:53:20\u005a", &pb.KnownTypes{Ts: &tspb.Timestamp{Seconds: 14e8, Nanos: 0}}},
+	{"PreEpochTimestamp", Unmarshaler{}, "ts\n1969-12-31T23:59:58.999999995Z", &pb.KnownTypes{Ts: &tspb.Timestamp{Seconds: -2, Nanos: 999999995}}},
+	{"ZeroTimeTimestamp", Unmarshaler{}, "ts\n0001-01-01T00:00:00Z", &pb.KnownTypes{Ts: &tspb.Timestamp{Seconds: -62135596800, Nanos: 0}}},
+	{"null Timestamp", Unmarshaler{}, "ts\nnull", &pb.KnownTypes{Ts: nil}},
+	{"null Struct", Unmarshaler{}, "st\nnull", &pb.KnownTypes{St: nil}},
+
+	{"null ListValue", Unmarshaler{}, `{"lv": null}`, &pb.KnownTypes{Lv: nil}},
+	{"empty ListValue", Unmarshaler{}, `{"lv": []}`, &pb.KnownTypes{Lv: &stpb.ListValue{}}},
+	{"basic ListValue", Unmarshaler{}, `{"lv": ["x", null, 3, true]}`, &pb.KnownTypes{Lv: &stpb.ListValue{Values: []*stpb.Value{
+		{Kind: &stpb.Value_StringValue{"x"}},
+		{Kind: &stpb.Value_NullValue{}},
+		{Kind: &stpb.Value_NumberValue{3}},
+		{Kind: &stpb.Value_BoolValue{true}},
+	}}}},
 	{"DoubleValue", Unmarshaler{}, "dbl\n1.2", &pb.KnownTypes{Dbl: &wpb.DoubleValue{Value: 1.2}}},
 	{"FloatValue", Unmarshaler{}, "flt\n1.2", &pb.KnownTypes{Flt: &wpb.FloatValue{Value: 1.2}}},
 	{"Int64Value", Unmarshaler{}, "i64\n-3", &pb.KnownTypes{I64: &wpb.Int64Value{Value: -3}}},
