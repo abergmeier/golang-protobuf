@@ -348,20 +348,24 @@ func (u *Unmarshaler) unmarshalValue(target reflect.Value, inputValue string, pr
 			target.Field(1).SetInt(int64(t.Nanosecond()))
 			return nil
 		case "ListValue":
-			/*
-			var s []RawMessage
-			if err := json.Unmarshal(inputValue, &s); err != nil {
-				return fmt.Errorf("bad ListValue: %v", err)
+			var s []string
+			if inputValue == "" {
+				s = []string{}
+			} else {
+				csvReader := csv.NewReader(strings.NewReader(inputValue))
+				var err error
+				s, err = csvReader.Read()
+				if err != nil {
+					return fmt.Errorf("bad ListValue: %v", err)
+				}
 			}
 
 			target.Field(0).Set(reflect.ValueOf(make([]*stpb.Value, len(s))))
 			for i, sv := range s {
-				if err := u.unmarshalValue(target.Field(0).Index(i), sv, prop); err != nil {
+				if err := u.unmarshalValue(target.Field(0).Index(i), sv, prop, NONE); err != nil {
 					return err
 				}
 			}
-			*/
-			panic("NOT IMPLEMENTED")
 			return nil
 		case "Value":
 			ivStr := string(inputValue)
@@ -379,6 +383,11 @@ func (u *Unmarshaler) unmarshalValue(target reflect.Value, inputValue string, pr
 
 			if v, err := strconv.ParseBool(ivStr); err == nil {
 				target.Field(0).Set(reflect.ValueOf(&stpb.Value_BoolValue{v}))
+				return nil
+			}
+
+			if v, err := strconv.ParseFloat(ivStr, 0); err == nil {
+				target.Field(0).Set(reflect.ValueOf(&stpb.Value_NumberValue{v}))
 				return nil
 			}
 			

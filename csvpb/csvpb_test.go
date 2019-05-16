@@ -198,7 +198,7 @@ var unmarshalingTests = []struct {
 	{"null Value", Unmarshaler{}, "val\n\"\"", &pb.KnownTypes{Val: &stpb.Value{Kind: &stpb.Value_NullValue{stpb.NullValue_NULL_VALUE}}}},
 	{"bool Value", Unmarshaler{}, "val\ntrue", &pb.KnownTypes{Val: &stpb.Value{Kind: &stpb.Value_BoolValue{true}}}},
 	{"string Value", Unmarshaler{}, "val\nx", &pb.KnownTypes{Val: &stpb.Value{Kind: &stpb.Value_StringValue{"x"}}}},
-	{"string number value", Unmarshaler{}, "val\n\"9223372036854775807\"", &pb.KnownTypes{Val: &stpb.Value{Kind: &stpb.Value_StringValue{"9223372036854775807"}}}},
+	{"string number value", Unmarshaler{}, "val\n\"9223372036854775807\"", &pb.KnownTypes{Val: &stpb.Value{Kind: &stpb.Value_NumberValue{9223372036854775807}}}},
 
 	{"oneof", Unmarshaler{}, "salary\n31000", &pb.MsgWithOneof{Union: &pb.MsgWithOneof_Salary{31000}}},
 	{"oneof spec name", Unmarshaler{}, "Country\nAustralia", &pb.MsgWithOneof{Union: &pb.MsgWithOneof_Country{"Australia"}}},
@@ -220,11 +220,11 @@ var unmarshalingTests = []struct {
 	{"null Timestamp", Unmarshaler{}, "ts\nnull", &pb.KnownTypes{Ts: nil}},
 	{"null Struct", Unmarshaler{}, "st\nnull", &pb.KnownTypes{St: nil}},
 
-	{"null ListValue", Unmarshaler{}, `{"lv": null}`, &pb.KnownTypes{Lv: nil}},
-	{"empty ListValue", Unmarshaler{}, `{"lv": []}`, &pb.KnownTypes{Lv: &stpb.ListValue{}}},
-	{"basic ListValue", Unmarshaler{}, `{"lv": ["x", null, 3, true]}`, &pb.KnownTypes{Lv: &stpb.ListValue{Values: []*stpb.Value{
+	{"null ListValue", Unmarshaler{}, "lv\nnull", &pb.KnownTypes{Lv: nil}},
+	{"empty ListValue", Unmarshaler{}, "lv\n\"\"", &pb.KnownTypes{Lv: &stpb.ListValue{}}},
+	{"basic ListValue", Unmarshaler{}, "lv\n\"x,null,3,true\"", &pb.KnownTypes{Lv: &stpb.ListValue{Values: []*stpb.Value{
 		{Kind: &stpb.Value_StringValue{"x"}},
-		{Kind: &stpb.Value_NullValue{}},
+		{Kind: &stpb.Value_StringValue{"null"}},
 		{Kind: &stpb.Value_NumberValue{3}},
 		{Kind: &stpb.Value_BoolValue{true}},
 	}}}},
