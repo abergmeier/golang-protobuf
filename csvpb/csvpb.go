@@ -376,26 +376,34 @@ func (u *Unmarshaler) unmarshalValue(target reflect.Value, inputValue string, pr
 
 			if strings.Contains(ivStr, ".") {
 				if v, err := strconv.ParseFloat(ivStr, 0); err == nil {
-					target.Field(0).Set(reflect.ValueOf(&stpb.Value_NumberValue{v}))
+					target.Field(0).Set(reflect.ValueOf(&stpb.Value_NumberValue{
+						NumberValue: v,
+					}))
 					return nil
 				}
 			}
 
 			if ivStr != "1" && ivStr != "t" && ivStr != "T" && ivStr != "0" && ivStr != "f" && ivStr != "F" {
 				if v, err := strconv.ParseBool(ivStr); err == nil {
-					target.Field(0).Set(reflect.ValueOf(&stpb.Value_BoolValue{v}))
+					target.Field(0).Set(reflect.ValueOf(&stpb.Value_BoolValue{
+						BoolValue: v,
+					}))
 					return nil
 				}
 			}
 
 			if v, err := strconv.ParseFloat(ivStr, 0); err == nil {
-				target.Field(0).Set(reflect.ValueOf(&stpb.Value_NumberValue{v}))
+				target.Field(0).Set(reflect.ValueOf(&stpb.Value_NumberValue{
+					NumberValue: v,
+				}))
 				return nil
 			}
 			
 			// There is no good way to detect signedness so default to plain
 			// string for anything else
-			target.Field(0).Set(reflect.ValueOf(&stpb.Value_StringValue{ivStr}))
+			target.Field(0).Set(reflect.ValueOf(&stpb.Value_StringValue{
+				StringValue: ivStr,
+			}))
 			return nil
 		}
 	}
