@@ -434,47 +434,8 @@ func (u *Unmarshaler) unmarshalValue(target reflect.Value, inputValue string, pr
 		}
 		return nil
 	}
-/*
-	// Handle maps (whose keys are always strings)
-	if targetType.Kind() == reflect.Map {
-		var mp map[string]json.RawMessage
-		if err := json.Unmarshal(inputValue, &mp); err != nil {
-			return err
-		}
-		if mp != nil {
-			target.Set(reflect.MakeMap(targetType))
-			for ks, raw := range mp {
-				// Unmarshal map key. The core json library already decoded the key into a
-				// string, so we handle that specially. Other types were quoted post-serialization.
-				var k reflect.Value
-				if targetType.Key().Kind() == reflect.String {
-					k = reflect.ValueOf(ks)
-				} else {
-					k = reflect.New(targetType.Key()).Elem()
-					var kprop *proto.Properties
-					if prop != nil && prop.MapKeyProp != nil {
-						kprop = prop.MapKeyProp
-					}
-					if err := u.unmarshalValue(k, json.RawMessage(ks), kprop); err != nil {
-						return err
-					}
-				}
 
-				// Unmarshal map value.
-				v := reflect.New(targetType.Elem()).Elem()
-				var vprop *proto.Properties
-				if prop != nil && prop.MapValProp != nil {
-					vprop = prop.MapValProp
-				}
-				if err := u.unmarshalValue(v, raw, vprop); err != nil {
-					return err
-				}
-				target.SetMapIndex(k, v)
-			}
-		}
-		return nil
-	}
-	*/
+	// Does not handle embedded maps
 
 	// Handle enums, which have an underlying type of int32,
 	// and may appear as strings.
