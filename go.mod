@@ -1,4 +1,4 @@
-module github.com/abergmeier/protobuf
+module github.com/abergmeier/golang-protobuf
 
 go 1.12
 
