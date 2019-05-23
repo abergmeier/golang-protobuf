@@ -40,7 +40,7 @@ import (
 	"github.com/golang/protobuf/proto"
 
 	durpb "github.com/golang/protobuf/ptypes/duration"
-	pb "github.com/abergmeier/protobuf/csvpb/csvpb_test_proto"
+	pb "github.com/golang/protobuf/jsonpb/jsonpb_test_proto"
 	proto3pb "github.com/golang/protobuf/proto/proto3_proto"
 	stpb "github.com/golang/protobuf/ptypes/struct"
 	tspb "github.com/golang/protobuf/ptypes/timestamp"
