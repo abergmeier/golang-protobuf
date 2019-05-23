@@ -149,11 +149,6 @@ func (u *Unmarshaler) Unmarshal(r io.Reader, pb proto.Message) error {
 	return u.UnmarshalNext(dec, pb)
 }
 
-func (u *Unmarshaler) unmarshalList(value RawMessage) error {
-
-	return nil
-}
-
 // UnmarshalNext unmarshals the next protocol buffer from a JSON object stream.
 // This function is lenient and will decode any options permutations of the
 // related Marshaler.

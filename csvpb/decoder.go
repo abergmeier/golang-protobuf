@@ -38,8 +38,6 @@ import (
 	"encoding/csv"
 )
 
-type RawMessage = []string
-
 /*
 Only decodes value lines
 */
