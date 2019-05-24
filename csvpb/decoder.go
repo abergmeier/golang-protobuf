@@ -1,7 +1,7 @@
 // Go support for Protocol Buffers - Google's data interchange format
 //
 // Copyright 2019 Andreas Bergmeier.  All rights reserved.
-// https://github.com/golang/protobuf
+// https://github.com/abergmeier/golang-protobuf
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -35,22 +35,73 @@ Package csvpb provides unmarshaling between protocol buffers and RFC 4180.
 package csvpb
 
 import (
+	"bufio"
 	"encoding/csv"
+	"io"
 )
 
-/*
-Only decodes value lines
-*/
+// Decoder decodes single line
 type Decoder struct {
-	Reader *csv.Reader
+	buffer *bufio.Reader
+	reader *csv.Reader
+	v []string
+	err error
+	reportedError bool
 }
 
-func NewDecoder(csvReader *csv.Reader) *Decoder {
-	return &Decoder{
-		Reader: csvReader,
+// NewDecoder creates a new Decoder. Internal state is implementation detail.
+func NewDecoder(r io.Reader) *Decoder {
+
+	br := bufio.NewReader(r)
+	d := &Decoder{
+		buffer: br,
+		reader: csv.NewReader(br),
+	}
+
+	d.prefetch()
+	return d
+}
+
+func (d *Decoder) prefetch() {
+	next, _ := d.buffer.Peek(1)
+	d.v, d.err = d.reader.Read()
+	if len(next) == 0 {
+		// There was nothing to read
+		d.v = nil
+		d.err = io.EOF
 	}
 }
 
+// More returns whether there is another value to return
+func (d *Decoder) More() bool {
+	if d.err == nil {
+		// We have a new value available
+		return true
+	}
+
+	if d.err == io.EOF {
+		return false
+	}
+
+	// Has the error been reported yet?
+	return !d.reportedError
+}
+
+// Decode extracts a slice of strings from next line. Returns nil when
+// nothing else to extract
 func (d *Decoder) Decode() ([]string, error) {
-	return d.Reader.Read()
+	// Value and error are already prefetched
+	if d.err != nil {
+		d.reportedError = true
+		if d.err == io.EOF {
+			return d.v, nil
+		}
+
+		// Do not allow advancing beyond an error
+		return nil, d.err
+	}
+
+	currentV, currentErr := d.v, d.err
+	d.prefetch()
+	return currentV, currentErr
 }

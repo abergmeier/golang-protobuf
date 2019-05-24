@@ -35,7 +35,6 @@ Package csvpb provides unmarshaling between protocol buffers and RFC 4180.
 package csvpb
 
 import (
-	"encoding/csv"
 	"errors"
 	"fmt"
 	"io"
@@ -121,7 +120,14 @@ type Unmarshaler struct {
 // UnmarshalNext unmarshals the next protocol buffer from a CSV.
 // This function is lenient and will decode any options permutations of the
 // related Marshaler.
+// Will panic, should Header be nil or Decoder have nothing to actually decode
 func (u *Unmarshaler) UnmarshalNext(dec *Decoder, pb proto.Message) error {
+	if u.Header == nil {
+		panic("Unmarshal needs header")
+	}
+	if !dec.More() {
+		panic("Decoder has nothing to decode")
+	}
 	var inputValue []string
 	var err error
 	if inputValue, err = dec.Decode(); err != nil {
@@ -136,16 +142,9 @@ func (u *Unmarshaler) UnmarshalNext(dec *Decoder, pb proto.Message) error {
 // Unmarshal unmarshals a CSV object stream into a protocol
 // buffer. This function is lenient and will decode any options
 // permutations of the related Marshaler.
+// Will panic, should Header be nil.
 func (u *Unmarshaler) Unmarshal(r io.Reader, pb proto.Message) error {
-	csvReader := csv.NewReader(r)
-	if u.Header == nil {
-		var err error
-		u.Header, err = csvReader.Read()
-		if err != nil {
-			return err
-		}
-	}
-	dec := NewDecoder(csvReader)
+	dec := NewDecoder(r)
 	return u.UnmarshalNext(dec, pb)
 }
 
@@ -347,9 +346,9 @@ func (u *Unmarshaler) unmarshalValue(target reflect.Value, inputValue string, pr
 			if inputValue == "" {
 				s = []string{}
 			} else {
-				csvReader := csv.NewReader(strings.NewReader(inputValue))
+				dec := NewDecoder(strings.NewReader(inputValue))
 				var err error
-				s, err = csvReader.Read()
+				s, err = dec.Decode()
 				if err != nil {
 					return fmt.Errorf("bad ListValue: %v", err)
 				}
@@ -420,8 +419,8 @@ func (u *Unmarshaler) unmarshalValue(target reflect.Value, inputValue string, pr
 			return nil
 		}
 
-		csvReader := csv.NewReader(strings.NewReader(inputValue))
-		slc, err := csvReader.Read()
+		dec := NewDecoder(strings.NewReader(inputValue))
+		slc, err := dec.Decode()
 		if err != nil {
 			return err
 		}

@@ -32,6 +32,8 @@
 package csvpb
 
 import (
+	"encoding/csv"
+	"io"
 	"math"
 	"reflect"
 	"strings"
@@ -262,11 +264,20 @@ var unmarshalingTests = []struct {
 }
 
 func TestUnmarshaling(t *testing.T) {
+
 	for _, tt := range unmarshalingTests {
 		// Make a new instance of the type of our expected object.
 		p := reflect.New(reflect.TypeOf(tt.pb).Elem()).Interface().(proto.Message)
 
-		err := tt.unmarshaler.Unmarshal(strings.NewReader(tt.csv), p)
+		separated := strings.SplitN(tt.csv, "\n", 2)
+		csvReader := csv.NewReader(strings.NewReader(separated[0]))
+		var err error
+		tt.unmarshaler.Header, err = csvReader.Read()
+		if err != nil && err != io.EOF {
+			t.Fatal(err)
+		}
+		stringReader := strings.NewReader(separated[1])
+		err = tt.unmarshaler.Unmarshal(stringReader, p)
 		if err != nil {
 			t.Errorf("unmarshalling %s: %v", tt.desc, err)
 			continue
@@ -279,4 +290,5 @@ func TestUnmarshaling(t *testing.T) {
 			t.Errorf("%s: got [%s] want [%s]", tt.desc, act, exp)
 		}
 	}
+
 }
