@@ -264,7 +264,6 @@ var unmarshalingTests = []struct {
 }
 
 func TestUnmarshaling(t *testing.T) {
-
 	for _, tt := range unmarshalingTests {
 		// Make a new instance of the type of our expected object.
 		p := reflect.New(reflect.TypeOf(tt.pb).Elem()).Interface().(proto.Message)
@@ -291,4 +290,25 @@ func TestUnmarshaling(t *testing.T) {
 		}
 	}
 
+}
+
+var unmarshalingShouldError = []struct {
+	desc        string
+	unmarshaler Unmarshaler
+	in          string
+	pb          proto.Message
+}{
+	{"unknown field", Unmarshaler{Header: []string{"unknown"}}, "foo", new(pb.Simple)},
+	{"unknown enum name", Unmarshaler{Header: []string{"hilarity"}}, `DAVE`, new(proto3pb.Message)},
+	{"Duration containing invalid character", Unmarshaler{Header: []string{"dur"}}, `3\U0073`, &pb.KnownTypes{}},
+	{"Timestamp containing invalid character", Unmarshaler{Header: []string{"ts"}}, `2014-05-13T16:53:20\U005a`, &pb.KnownTypes{}},
+}
+
+func TestUnmarshalingBadInput(t *testing.T) {
+	for _, tt := range unmarshalingShouldError {
+		err := tt.unmarshaler.UnmarshalString(tt.in, tt.pb)
+		if err == nil {
+			t.Errorf("an error was expected when parsing %q instead of an object", tt.desc)
+		}
+	}
 }
