@@ -148,6 +148,14 @@ func (u *Unmarshaler) Unmarshal(r io.Reader, pb proto.Message) error {
 	return u.UnmarshalNext(dec, pb)
 }
 
+// UnmarshalString will populate the fields of a protocol buffer based
+// on a CSV string. This function is lenient and will decode any options
+// permutations of the related Marshaler.
+// Will panic, should Header be nil.
+func (u *Unmarshaler) UnmarshalString(str string, pb proto.Message) error {
+	return u.Unmarshal(strings.NewReader(str), pb)
+}
+
 // UnmarshalNext unmarshals the next protocol buffer from a JSON object stream.
 // This function is lenient and will decode any options permutations of the
 // related Marshaler.
@@ -160,13 +168,6 @@ func UnmarshalNext(dec *Decoder, pb proto.Message) error {
 // permutations of the related Marshaler.
 func Unmarshal(r io.Reader, pb proto.Message) error {
 	return new(Unmarshaler).Unmarshal(r, pb)
-}
-
-// UnmarshalString will populate the fields of a protocol buffer based
-// on a JSON string. This function is lenient and will decode any options
-// permutations of the related Marshaler.
-func UnmarshalString(str string, pb proto.Message) error {
-	return new(Unmarshaler).Unmarshal(strings.NewReader(str), pb)
 }
 
 // unmarshalRecord converts/copies a record into the target.
