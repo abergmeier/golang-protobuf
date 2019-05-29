@@ -53,15 +53,15 @@ import (
 const (
 	secondInNanos = int64(time.Second / time.Nanosecond)
 
-	NONE = iota
-	BOOL
-	DOUBLE
-	FLOAT
-	INT32
-	INT64
-	STRING
-	UINT32
-	UINT64
+	noneHint = iota
+	boolHint
+	doubleHint
+	floatHint
+	int32Hint
+	int64Hint
+	stringHint
+	uint32Hint
+	uint64Hint
 
 )
 
@@ -216,7 +216,7 @@ func (u *Unmarshaler) unmarshalRecord(target reflect.Value, inputRecord []string
 				continue
 			}
 
-			if err := u.unmarshalValue(target.Field(i), valueForField, sprops.Prop[i], NONE); err != nil {
+			if err := u.unmarshalValue(target.Field(i), valueForField, sprops.Prop[i], noneHint); err != nil {
 				return err
 			}
 
@@ -231,7 +231,7 @@ func (u *Unmarshaler) unmarshalRecord(target reflect.Value, inputRecord []string
 				}
 				nv := reflect.New(oop.Type.Elem())
 				target.Field(oop.Field).Set(nv)
-				if err := u.unmarshalValue(nv.Elem().Field(0), raw, oop.Prop, NONE); err != nil {
+				if err := u.unmarshalValue(nv.Elem().Field(0), raw, oop.Prop, noneHint); err != nil {
 					return err
 				}
 			}
@@ -289,30 +289,30 @@ func (u *Unmarshaler) unmarshalValue(target reflect.Value, inputValue string, pr
 		}
 		target.Set(reflect.New(targetType.Elem()))
 
-		return u.unmarshalValue(target.Elem(), inputValue, prop, NONE)
+		return u.unmarshalValue(target.Elem(), inputValue, prop, noneHint)
 	}
 
 	// Handle well-known types that are not pointers.
 	if w, ok := target.Addr().Interface().(wkt); ok {
 		switch w.XXX_WellKnownType() {
 		case "DoubleValue":
-			return u.unmarshalValue(target.Field(0), inputValue, prop, DOUBLE)
+			return u.unmarshalValue(target.Field(0), inputValue, prop, doubleHint)
 		case "FloatValue":
-			return u.unmarshalValue(target.Field(0), inputValue, prop, FLOAT)
+			return u.unmarshalValue(target.Field(0), inputValue, prop, floatHint)
 		case "Int64Value":
-			return u.unmarshalValue(target.Field(0), inputValue, prop, INT64)
+			return u.unmarshalValue(target.Field(0), inputValue, prop, int64Hint)
 		case "UInt64Value":
-			return u.unmarshalValue(target.Field(0), inputValue, prop, UINT64)
+			return u.unmarshalValue(target.Field(0), inputValue, prop, uint64Hint)
 		case "Int32Value":
-			return u.unmarshalValue(target.Field(0), inputValue, prop, INT32)
+			return u.unmarshalValue(target.Field(0), inputValue, prop, int32Hint)
 		case "UInt32Value":
-			return u.unmarshalValue(target.Field(0), inputValue, prop, UINT32)
+			return u.unmarshalValue(target.Field(0), inputValue, prop, uint32Hint)
 		case "BoolValue":
-			return u.unmarshalValue(target.Field(0), inputValue, prop, BOOL)
+			return u.unmarshalValue(target.Field(0), inputValue, prop, boolHint)
 		case "StringValue":
-			return u.unmarshalValue(target.Field(0), inputValue, prop, STRING)
+			return u.unmarshalValue(target.Field(0), inputValue, prop, stringHint)
 		case "BytesValue":
-			return u.unmarshalValue(target.Field(0), inputValue, prop, NONE)
+			return u.unmarshalValue(target.Field(0), inputValue, prop, noneHint)
 		case "Any":
 			return errors.New("Cannot determine type of Any")
 		case "Duration":
@@ -357,7 +357,7 @@ func (u *Unmarshaler) unmarshalValue(target reflect.Value, inputValue string, pr
 
 			target.Field(0).Set(reflect.ValueOf(make([]*stpb.Value, len(s))))
 			for i, sv := range s {
-				if err := u.unmarshalValue(target.Field(0).Index(i), sv, prop, NONE); err != nil {
+				if err := u.unmarshalValue(target.Field(0).Index(i), sv, prop, noneHint); err != nil {
 					return err
 				}
 			}
@@ -430,7 +430,7 @@ func (u *Unmarshaler) unmarshalValue(target reflect.Value, inputValue string, pr
 			l := len(slc)
 			target.Set(reflect.MakeSlice(targetType, l, l))
 			for i := 0; i < l; i++ {
-				if err := u.unmarshalValue(target.Index(i), slc[i], prop, NONE); err != nil {
+				if err := u.unmarshalValue(target.Index(i), slc[i], prop, noneHint); err != nil {
 					return err
 				}
 			}
