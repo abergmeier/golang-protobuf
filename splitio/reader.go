@@ -87,8 +87,8 @@ func (r *rhsReader) Read(p []byte) (n int, err error) {
 // NewReadersSequential splits the input reader by a seperator.
 // Returns a first Reader for reading everything until first occurence of
 // said separator. Also a second Reader for everything after first occurence
-// of said operator.
-// Second Reader will only start once all of first reader was consumed.
+// of said separator.
+// Second Reader will only start once first Reader reached EOF.
 func NewReadersSequential(r io.Reader, sep byte) (io.Reader, io.Reader) {
 	br := bufio.NewReader(r)
 	wg := &sync.WaitGroup{}
