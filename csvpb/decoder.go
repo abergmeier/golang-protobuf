@@ -29,9 +29,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-/*
-Package csvpb provides unmarshaling between protocol buffers and RFC 4180.
-*/
 package csvpb
 
 import (

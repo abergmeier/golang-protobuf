@@ -1,3 +1,7 @@
+/*
+Package splitio provides tools to splitting io (e.g. Readers) so it can easily
+been worked with when using Protobuf.
+*/
 package splitio
 
 import (
