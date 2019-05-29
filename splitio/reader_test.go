@@ -1,4 +1,4 @@
-package csvpb
+package splitio
 
 import (
 	"bytes"
@@ -20,13 +20,13 @@ var splitReaderTest = []struct {
 	{"Split first test", []byte("foo,bar,my\n1\n2,3"), []byte("\n")[0], []byte(`foo,bar,my`), []byte("1\n2,3")},
 }
 
-// TestSplitReaderSequential test splitting of inputs by a separator. Tries
+// TestNewReadersSequential test splitting of inputs by a separator. Tries
 // mostly to find edge cases, where things could go wrong.
-func TestSplitReaderSequential(t *testing.T) {
+func TestNewReadersSequential(t *testing.T) {
 	for _, st := range splitReaderTest {
 
 		r := bytes.NewReader(st.input)
-		lhsR, rhsR := SplitReaderSequential(r, st.sep)
+		lhsR, rhsR := NewReadersSequential(r, st.sep)
 
 		lhs, err := ioutil.ReadAll(lhsR)
 		if err != nil {

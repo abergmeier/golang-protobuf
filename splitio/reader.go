@@ -1,4 +1,4 @@
-package csvpb
+package splitio
 
 import (
 	"bufio"
@@ -80,12 +80,12 @@ func (r *rhsReader) Read(p []byte) (n int, err error) {
 	return r.br.Read(p)
 }
 
-// SplitReaderSequential splits the input reader by a seperator.
+// NewReadersSequential splits the input reader by a seperator.
 // Returns a first Reader for reading everything until first occurence of
 // said separator. Also a second Reader for everything after first occurence
 // of said operator.
 // Second Reader will only start once all of first reader was consumed.
-func SplitReaderSequential(r io.Reader, sep byte) (io.Reader, io.Reader) {
+func NewReadersSequential(r io.Reader, sep byte) (io.Reader, io.Reader) {
 	br := bufio.NewReader(r)
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
