@@ -114,9 +114,9 @@ func (r *rhsReader) Read(p []byte) (n int, err error) {
 	return r.br.Read(p)
 }
 
-// NewReadersSequential splits the input reader by a seperator.
-// Returns a first Reader for reading everything until first occurence of
-// said separator. Also a second Reader for everything after first occurence
+// NewReadersSequential splits the input reader by a separator.
+// Returns a first Reader for reading everything until first occurrence of
+// said separator. Also a second Reader for everything after first occurrence
 // of said separator.
 // Second Reader will only start once first Reader reached EOF.
 func NewReadersSequential(r io.Reader, sep byte) (io.Reader, io.Reader) {
