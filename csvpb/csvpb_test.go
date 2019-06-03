@@ -41,16 +41,15 @@ import (
 
 	"github.com/golang/protobuf/proto"
 
-	durpb "github.com/golang/protobuf/ptypes/duration"
 	pb "github.com/golang/protobuf/jsonpb/jsonpb_test_proto"
 	proto3pb "github.com/golang/protobuf/proto/proto3_proto"
+	durpb "github.com/golang/protobuf/ptypes/duration"
 	stpb "github.com/golang/protobuf/ptypes/struct"
 	tspb "github.com/golang/protobuf/ptypes/timestamp"
 	wpb "github.com/golang/protobuf/ptypes/wrappers"
 )
 
 var (
-
 	simpleObject = &pb.Simple{
 		OInt32:     proto.Int32(-32),
 		OInt32Str:  proto.Int32(-32),
@@ -127,9 +126,9 @@ var (
 	innerSimple2  = &pb.Simple{OInt64: proto.Int64(25)}
 	innerRepeats  = &pb.Repeats{RString: []string{"roses", "red"}}
 	innerRepeats2 = &pb.Repeats{RString: []string{"violets", "blue"}}
-	enumObject = &pb.Widget{
-		Color:    pb.Widget_GREEN.Enum(),
-		RColor:   []pb.Widget_Color{pb.Widget_RED, pb.Widget_GREEN, pb.Widget_BLUE},
+	enumObject    = &pb.Widget{
+		Color:  pb.Widget_GREEN.Enum(),
+		RColor: []pb.Widget_Color{pb.Widget_RED, pb.Widget_GREEN, pb.Widget_BLUE},
 	}
 
 	enumObjectCSV = `color,rColor
@@ -246,7 +245,6 @@ var unmarshalingTests = []struct {
 	{"StringValue", Unmarshaler{}, "str\nplush", &pb.KnownTypes{Str: &wpb.StringValue{Value: "plush"}}},
 	{"StringValue containing escaped character", Unmarshaler{}, "str\na/b", &pb.KnownTypes{Str: &wpb.StringValue{Value: "a/b"}}},
 	{"BytesValue", Unmarshaler{}, "bytes\nd293", &pb.KnownTypes{Bytes: &wpb.BytesValue{Value: []byte("wow")}}},
-
 
 	// Ensure that `null` as a value ends up with a nil pointer instead of a [type]Value struct.
 	{"null DoubleValue", Unmarshaler{}, "dbl\nnull", &pb.KnownTypes{Dbl: nil}},

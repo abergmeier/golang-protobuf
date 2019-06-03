@@ -44,8 +44,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/golang/protobuf/proto"
 	"encoding/base64"
+	"github.com/golang/protobuf/proto"
 
 	stpb "github.com/golang/protobuf/ptypes/struct"
 )
@@ -62,7 +62,6 @@ const (
 	stringHint
 	uint32Hint
 	uint64Hint
-
 )
 
 // CSVPBUnmarshaler is implemented by protobuf messages that customize
@@ -393,7 +392,7 @@ func (u *Unmarshaler) unmarshalValue(target reflect.Value, inputValue string, pr
 				}))
 				return nil
 			}
-			
+
 			// There is no good way to detect signedness so default to plain
 			// string for anything else
 			target.Field(0).Set(reflect.ValueOf(&stpb.Value_StringValue{

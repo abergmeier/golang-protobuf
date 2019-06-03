@@ -33,8 +33,8 @@ package csvpb
 
 import (
 	"reflect"
-	"testing"
 	"strings"
+	"testing"
 )
 
 func TestEmptyDecode(t *testing.T) {

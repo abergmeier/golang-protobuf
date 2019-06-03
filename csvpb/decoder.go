@@ -39,10 +39,10 @@ import (
 
 // Decoder decodes single line
 type Decoder struct {
-	buffer *bufio.Reader
-	reader *csv.Reader
-	v []string
-	err error
+	buffer        *bufio.Reader
+	reader        *csv.Reader
+	v             []string
+	err           error
 	reportedError bool
 }
 
