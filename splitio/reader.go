@@ -124,11 +124,11 @@ func NewReadersSequential(r io.Reader, sep byte) (io.Reader, io.Reader) {
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	return &lhsReader{
-		br:  br,
-		wg:  wg,
-		sep: sep,
-	}, &rhsReader{
-		br: br,
-		wg: wg,
-	}
+			br:  br,
+			wg:  wg,
+			sep: sep,
+		}, &rhsReader{
+			br: br,
+			wg: wg,
+		}
 }

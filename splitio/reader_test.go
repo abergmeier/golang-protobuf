@@ -39,11 +39,11 @@ import (
 )
 
 var splitReaderTest = []struct {
-	name string
+	name  string
 	input []byte
-	sep byte
-	lhs []byte
-	rhs []byte
+	sep   byte
+	lhs   []byte
+	rhs   []byte
 }{
 	{"Simple test", []byte("foo,bar,my\n1,2,3"), []byte("\n")[0], []byte("foo,bar,my"), []byte(`1,2,3`)},
 	{"Lefty test", []byte("foo,bar,my\n"), []byte("\n")[0], []byte("foo,bar,my"), []byte{}},
